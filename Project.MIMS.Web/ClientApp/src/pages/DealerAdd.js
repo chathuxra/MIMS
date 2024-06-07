@@ -183,15 +183,15 @@ export default function DealerAddPage() {
     }
 
     async function SubmitForm(values) {
+        let model = {
+            dealerName: values.dealerName,
+            regNo: values.regNo,
+            contactNo: values.contactNo,
+            address: values.address,
+            email: values.email,
+            createdBy: userId == null ? 0 : parseInt(userId),
+        }
         if (isUpdate) {
-            let model = {
-                dealerName: values.categoryName,
-                regNo: values.regNo,
-                contactNo: values.contactNo,
-                address: values.address,
-                email: values.email,
-                createdBy: userId == null ? 0 : parseInt(userId),
-            }
             const result = await axios.post('https://localhost:7211/api/Item/ItemCategoryUpdate', model);
             if (result.data.statusCode === "Error") {
                 toast.error(result.data.message);
@@ -200,19 +200,11 @@ export default function DealerAddPage() {
             else {
                 toast.success(result.data.message, {
                     autoClose: 500,
-                    onClose: () => navigate('/dashboard/category', { replace: true })
+                    onClose: () => navigate('/dashboard/Dealer', { replace: true })
                 });
             }
         } else {
-            let model = {
-                dealerName: values.categoryName,
-                regNo: values.regNo,
-                contactNo: values.contactNo,
-                address: values.address,
-                email: values.email,
-                createdBy: userId == null ? 0 : parseInt(userId)
-            }
-            const result = await axios.post('https://localhost:7211/api/Item/ItemCategorySave', model);
+            const result = await axios.post('https://localhost:7211/api/Dealer/DealerSave', model);
             if (result.data.statusCode === "Error") {
                 toast.error(result.data.message);
                 return;
@@ -220,14 +212,13 @@ export default function DealerAddPage() {
             else {
                 toast.success(result.data.message, {
                     autoClose: 500,
-                    onClose: () => navigate('/dashboard/category', { replace: true })
+                    onClose: () => navigate('/dashboard/Dealer', { replace: true })
                 });
             }
         }
     }
 
     const { setValues, handleSubmit, getFieldProps, values } = formik;
-    console.log("values", formik.values)
 
     return (
         <Box mt={0}>
