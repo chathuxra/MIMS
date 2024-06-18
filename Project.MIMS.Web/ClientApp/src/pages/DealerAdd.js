@@ -30,7 +30,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Grid from '@material-ui/core/Grid';
 import InputLabel from '@material-ui/core/InputLabel';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { Link as RouterLink, useNavigate, useHref } from 'react-router-dom';
+import { useParams, useNavigate, useHref } from 'react-router-dom';
 
 // ----------------------------------------------------------------------
 function TablePaginationActions(props) {
@@ -96,11 +96,10 @@ TablePaginationActions.propTypes = {
 
 export default function DealerAddPage() {
     const navigate = useNavigate();
-    const [openFilter, setOpenFilter] = useState(false);
+    const { dealerID } = useParams();
     const [isUpdate, setIsUpdate] = useState(false);
     const [userId, setUserId] = useState(null);
     const [donationTypeID, setDonationTypeID] = useState(0);
-    const [tableData, setTableData] = useState([]);
     const [formData, setFormData] = useState({
         dealerName: '',
         regNo: '',
@@ -112,23 +111,29 @@ export default function DealerAddPage() {
     useEffect(() => {
         const userIdFromStorage = localStorage.getItem('userId');
         setUserId(userIdFromStorage);
+        if (dealerID > 0) {
+            setIsUpdate(true)
+            GetDealerDetailsByDealerID(dealerID);
+        } else {
+            setIsUpdate(false)
+        }
     }, []);
 
-    useEffect(() => {
-        if (userId != null) {
-            GetDonationTypeID();
-        }
-    }, [userId]);
+    // useEffect(() => {
+    //     if (userId != null) {
+    //         GetDonationTypeID();
+    //     }
+    // }, [userId]);
 
-    useEffect(() => {
-        if (donationTypeID != 0) {
-            DonationRequestDetailsGet();
-        }
-    }, [donationTypeID]);
+    // useEffect(() => {
+    //     if (donationTypeID != 0) {
+    //         DonationRequestDetailsGet();
+    //     }
+    // }, [donationTypeID]);
 
     const formik = useFormik({
         initialValues: {
-            dealerName: formData.categoryName,
+            dealerName: formData.dealerName,
             regNo: formData.regNo,
             contactNo: formData.contactNo,
             address: formData.address,
@@ -154,8 +159,8 @@ export default function DealerAddPage() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
-    const emptyRows =
-        page > 0 ? Math.max(0, (1 + page) * rowsPerPage - tableData.length) : 0;
+    // const emptyRows =
+    //     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - tableData.length) : 0;
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -166,17 +171,31 @@ export default function DealerAddPage() {
         setPage(0);
     };
 
-    async function GetDonationTypeID() {
-        const result = await axios.get('https://localhost:7211/api/DonationType/GetDonationTypeID', { params: { userID: parseInt(userId) } });
-        setDonationTypeID(result.data.data.donationTypeID);
+    async function GetDealerDetailsByDealerID(dealerID) {
+        const result = await axios.get('https://localhost:7211/api/Dealer/GetDealerDetailsByDealerID', { params: { dealerID: parseInt(dealerID) } });
+        console.log("result", result)
+        setValues({
+            ...values,
+            dealerName: result.data.data.dealerName,
+            regNo: result.data.data.regNo,
+            contactNo: result.data.data.contactNo,
+            address: result.data.data.address,
+            email: result.data.data.email
+        });
         return;
     }
 
-    async function DonationRequestDetailsGet() {
-        const result = await axios.get('https://localhost:7211/api/DonationRequest/DonationRequestDetailsGet', { params: { DonationTypeID: parseInt(donationTypeID) } });
-        setTableData(result.data.data);
-        return;
-    }
+    // async function GetDonationTypeID() {
+    //     const result = await axios.get('https://localhost:7211/api/DonationType/GetDonationTypeID', { params: { userID: parseInt(userId) } });
+    //     setDonationTypeID(result.data.data.donationTypeID);
+    //     return;
+    // }
+
+    // async function DonationRequestDetailsGet() {
+    //     const result = await axios.get('https://localhost:7211/api/DonationRequest/DonationRequestDetailsGet', { params: { DonationTypeID: parseInt(donationTypeID) } });
+    //     setTableData(result.data.data);
+    //     return;
+    // }
 
     function handleClick() {
         navigate('/dashboard/Dealer');
@@ -184,6 +203,7 @@ export default function DealerAddPage() {
 
     async function SubmitForm(values) {
         let model = {
+            dealerID: dealerID,
             dealerName: values.dealerName,
             regNo: values.regNo,
             contactNo: values.contactNo,
@@ -192,7 +212,7 @@ export default function DealerAddPage() {
             createdBy: userId == null ? 0 : parseInt(userId),
         }
         if (isUpdate) {
-            const result = await axios.post('https://localhost:7211/api/Item/ItemCategoryUpdate', model);
+            const result = await axios.post('https://localhost:7211/api/Dealer/DealerUpdate', model);
             if (result.data.statusCode === "Error") {
                 toast.error(result.data.message);
                 return;
@@ -323,7 +343,7 @@ export default function DealerAddPage() {
                                     size='small'
                                     variant="contained"
                                 >
-                                    {"Save"}
+                                    {!isUpdate ? "Save" : "Upadate"}
                                 </Button>
                             </Box>
                         </Form>

@@ -38,7 +38,7 @@ export default function Router() {
         { path: 'SubCategory', element: <SubCategoryPage /> },
         { path: 'Dealer', element: <DealerPage /> },
         { path: 'Item', element: <ItemPage /> },
-        { path: 'DealerAdd', element: <DealerAddPage /> },
+        { path: 'DealerAdd/:dealerID', element: <DealerAddPage /> },
         { path: 'ItemAdd', element: <ItemAddPage /> },
         { path: 'Sales', element: <SalesPage /> },
         // { path: 'profilePage', element: <ProfilePage /> },

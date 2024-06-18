@@ -6,6 +6,7 @@ namespace Project.MIMS.Core.Models.Dealer
 {
     public class DealerSaveModel
     {
+        public int DealerID { get; set; }
         public string DealerName { get; set; }
         public string RegNo { get; set; }
         public string ContactNo { get; set; }

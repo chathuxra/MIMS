@@ -1,15 +1,13 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Project.MIMS.Core.Common;
 using Project.MIMS.Core;
+using Project.MIMS.Core.Common;
+using Project.MIMS.Core.Models.Dealer;
 using Project.MIMS.Core.Services.Dealer;
-using Project.MIMS.Core.Services.ItemManagement;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Project.MIMS.Core.Models.ItemManagement;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
-using Project.MIMS.Core.Models.Dealer;
 
 namespace Project.MIMS.Services.Dealer
 {
@@ -41,7 +39,7 @@ namespace Project.MIMS.Services.Dealer
                     { "CreatedBy", Tuple.Create(model.CreatedBy.ToString(), DbType.Int32, ParameterDirection.Input) }
                 };
 
-                var result = await UnitOfWork.Repository<ItemCategoryModel>().ExecuteSPWithInputOutputAsync("[Item].[DealerSave]", parameters);
+                var result = await UnitOfWork.Repository<DealerSaveModel>().ExecuteSPWithInputOutputAsync("[Item].[DealerSave]", parameters);
                 if (result == -1)
                 {
                     return MIMSResponse.GenerateResponseMessage(MIMSResponseEnum.Error.ToString(), "Dealer Already Exists", result);
@@ -62,5 +60,84 @@ namespace Project.MIMS.Services.Dealer
                 throw ex;
             }
         }
+
+        public async Task<MIMSResponse> GetDealersForDropDown()
+        {
+            try
+            {
+                var result = await UnitOfWork.Repository<DealerSaveModel>().GetEntitiesBySPAsyncWithoutParameters("[Item].[GetDealersForDropDown]");
+                return MIMSResponse.GenerateResponseMessage(MIMSResponseEnum.Success.ToString(), string.Empty, result);
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+        }
+
+        public async Task<MIMSResponse> GetDealerDetails(DealerSaveModel model)
+        {
+            var parameters = new Dictionary<string, Tuple<string, DbType, ParameterDirection>>
+            {
+                  { "DealerID", Tuple.Create(model.DealerID == 0 ? null : model.DealerID == 0 ? null : model.DealerID.ToString(), DbType.Int32, ParameterDirection.Input) },
+                  { "RegNo", Tuple.Create(model.RegNo == "" ? null : model.RegNo.ToString(), DbType.String, ParameterDirection.Input) },
+                  { "ContactNo", Tuple.Create(model.ContactNo == "" ? null : model.ContactNo.ToString(), DbType.String, ParameterDirection.Input) },
+            };
+
+            var result = await UnitOfWork.Repository<DealerSaveModel>().GetEntitiesBySPAsync("[Item].[GetDealerDetails]", parameters);
+            if (result.Count() == 0)
+            {
+                return MIMSResponse.GenerateResponseMessage(MIMSResponseEnum.Error.ToString(), "No Records to Display", result);
+            }
+            return MIMSResponse.GenerateResponseMessage(MIMSResponseEnum.Success.ToString(), null, result);
+        }
+
+        public async Task<MIMSResponse> GetDealerDetailsByDealerID(int dealerID)
+        {
+            var parameters = new Dictionary<string, Tuple<string, DbType, ParameterDirection>>
+            {
+                  { "DealerID", Tuple.Create(dealerID.ToString(), DbType.Int32, ParameterDirection.Input) },
+            };
+
+            var result = await UnitOfWork.Repository<DealerSaveModel>().GetEntityBySPAsync("[Item].[GetDealerDetailsByDealerID]", parameters);
+            return MIMSResponse.GenerateResponseMessage(MIMSResponseEnum.Success.ToString(), null, result);
+
+        }
+
+        public async Task<MIMSResponse> DealerUpdate(DealerSaveModel model)
+        {
+            try
+            {
+                var parameters = new Dictionary<string, Tuple<string, DbType, ParameterDirection>>
+                {
+                    { "DealerID", Tuple.Create(model.DealerID.ToString(), DbType.Int32, ParameterDirection.Input) },
+                    { "DealerName", Tuple.Create(model.DealerName.ToString(), DbType.String, ParameterDirection.Input) },
+                    { "RegNo", Tuple.Create(model.RegNo.ToString(), DbType.String, ParameterDirection.Input) },
+                    { "ContactNo", Tuple.Create(model.ContactNo.ToString(), DbType.String, ParameterDirection.Input) },
+                    { "Address", Tuple.Create(model.Address.ToString(), DbType.String, ParameterDirection.Input) },
+                    { "Email", Tuple.Create(model.Email.ToString(), DbType.String, ParameterDirection.Input) },
+                    { "CreatedBy", Tuple.Create(model.CreatedBy.ToString(), DbType.Int32, ParameterDirection.Input) },
+                    { "Result", Tuple.Create("-1".ToString(), DbType.Int32, ParameterDirection.InputOutput) },
+                };
+
+                var result = await UnitOfWork.Repository<DealerSaveModel>().ExecuteSPWithInputOutputAsync("[Item].[DelaerUpdate]", parameters);
+                if (result == -1)
+                {
+                    return MIMSResponse.GenerateResponseMessage(MIMSResponseEnum.Error.ToString(), "Dealer Update Failed", result);
+                }
+                else
+                {
+                    return MIMSResponse.GenerateResponseMessage(MIMSResponseEnum.Success.ToString(), "Dealer Update Sucessfully", result);
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+        }
+
+
     }
 }
